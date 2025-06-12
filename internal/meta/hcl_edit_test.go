@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/Azure/aztfexport/internal/tfaddr"
-	"github.com/Azure/aztfexport/internal/tfresourceid"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/stretchr/testify/assert"
@@ -37,8 +36,8 @@ func TestApplyReferenceDependenciesToHcl(t *testing.T) {
   foo_id = "/subscriptions/123/resourceGroups/123/providers/Microsoft.Foo/foo/123"
 `,
 			referenceDependencies: ReferenceDependencies{
-				internalMap: map[tfresourceid.TFResourceId]tfaddr.TFAddr{
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/123/providers/Microsoft.Foo/foo/123"): tfAddr("azurerm_foo_resource.res-1"),
+				internalMap: map[string]tfaddr.TFAddr{
+					"/subscriptions/123/resourceGroups/123/providers/Microsoft.Foo/foo/123": tfAddr("azurerm_foo_resource.res-1"),
 				},
 			},
 			expectedHcl: `
@@ -57,9 +56,9 @@ func TestApplyReferenceDependenciesToHcl(t *testing.T) {
   }
 `,
 			referenceDependencies: ReferenceDependencies{
-				internalMap: map[tfresourceid.TFResourceId]tfaddr.TFAddr{
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/123/providers/Microsoft.Foo/foo/123"): tfAddr("azurerm_foo_resource.res-1"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/123/providers/Microsoft.Bar/bar/456"): tfAddr("azurerm_bar_resource.res-2"),
+				internalMap: map[string]tfaddr.TFAddr{
+					"/subscriptions/123/resourceGroups/123/providers/Microsoft.Foo/foo/123": tfAddr("azurerm_foo_resource.res-1"),
+					"/subscriptions/123/resourceGroups/123/providers/Microsoft.Bar/bar/456": tfAddr("azurerm_bar_resource.res-2"),
 				},
 			},
 			expectedHcl: `
@@ -82,9 +81,9 @@ func TestApplyReferenceDependenciesToHcl(t *testing.T) {
   }
 `,
 			referenceDependencies: ReferenceDependencies{
-				internalMap: map[tfresourceid.TFResourceId]tfaddr.TFAddr{
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/123/providers/Microsoft.Foo/foo/123"): tfAddr("azurerm_foo_resource.res-1"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/123/providers/Microsoft.Bar/bar/456"): tfAddr("azurerm_bar_resource.res-2"),
+				internalMap: map[string]tfaddr.TFAddr{
+					"/subscriptions/123/resourceGroups/123/providers/Microsoft.Foo/foo/123": tfAddr("azurerm_foo_resource.res-1"),
+					"/subscriptions/123/resourceGroups/123/providers/Microsoft.Bar/bar/456": tfAddr("azurerm_bar_resource.res-2"),
 				},
 			},
 			expectedHcl: `
@@ -172,9 +171,9 @@ azurerm_resource_group.res-1
 `,
 			explicitDependencies: TFAddrSet{},
 			ambiguousDependencies: AmbiguousDependencies{
-				internalMap: map[tfresourceid.TFResourceId]*TFAddrSet{
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/123/providers/Microsoft.Foo/foo/123"): tfAddrSet("azurerm_foo_sub1_resource.res-1", "azurerm_foo_sub2_resource.res-2"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/123/providers/Microsoft.Bar/bar/456"): tfAddrSet("azurerm_bar_sub1_resource.res-3", "azurerm_bar_sub2_resource.res-4"),
+				internalMap: map[string]*TFAddrSet{
+					"/subscriptions/123/resourceGroups/123/providers/Microsoft.Foo/foo/123": tfAddrSet("azurerm_foo_sub1_resource.res-1", "azurerm_foo_sub2_resource.res-2"),
+					"/subscriptions/123/resourceGroups/123/providers/Microsoft.Bar/bar/456": tfAddrSet("azurerm_bar_sub1_resource.res-3", "azurerm_bar_sub2_resource.res-4"),
 				},
 			},
 			expectedHcl: `

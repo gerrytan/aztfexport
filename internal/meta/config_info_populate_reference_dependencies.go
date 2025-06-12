@@ -3,7 +3,6 @@ package meta
 import (
 	"fmt"
 
-	"github.com/Azure/aztfexport/internal/tfresourceid"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/zclconf/go-cty/cty"
@@ -15,7 +14,7 @@ import (
 // Note that the a single TF resource id can map to multiple resources -- in which case the dependencies will be categorised
 // as ambiguous.
 func (cfgs ConfigInfos) PopulateReferenceDependencies() error {
-	m := map[tfresourceid.TFResourceId][]*ConfigInfo{}
+	m := map[string][]*ConfigInfo{}
 	for _, cfg := range cfgs {
 		m[cfg.TFResourceId] = append(m[cfg.TFResourceId], &cfg)
 	}
@@ -34,7 +33,7 @@ func (cfgs ConfigInfos) PopulateReferenceDependencies() error {
 			if !expr.Val.IsKnown() || !val.Type().Equals(cty.String) {
 				return nil
 			}
-			maybeTFId := tfresourceid.TFResourceId(val.AsString())
+			maybeTFId := val.AsString()
 
 			// This is safe to match case sensitively given the TF id are consistent across the provider. Otherwise, it is a provider bug.
 			dependingConfigs, ok := m[maybeTFId]

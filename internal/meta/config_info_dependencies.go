@@ -6,11 +6,10 @@ import (
 	"strings"
 
 	"github.com/Azure/aztfexport/internal/tfaddr"
-	"github.com/Azure/aztfexport/internal/tfresourceid"
 )
 
 type ReferenceDependencies struct {
-	internalMap map[tfresourceid.TFResourceId]tfaddr.TFAddr
+	internalMap map[string]tfaddr.TFAddr
 }
 
 type TFAddrSet struct {
@@ -18,22 +17,22 @@ type TFAddrSet struct {
 }
 
 type AmbiguousDependencies struct {
-	internalMap map[tfresourceid.TFResourceId]*TFAddrSet
+	internalMap map[string]*TFAddrSet
 }
 
-func (d *ReferenceDependencies) Add(id tfresourceid.TFResourceId, addr tfaddr.TFAddr) {
+func (d *ReferenceDependencies) Add(id string, addr tfaddr.TFAddr) {
 	if d.internalMap == nil {
-		d.internalMap = make(map[tfresourceid.TFResourceId]tfaddr.TFAddr)
+		d.internalMap = make(map[string]tfaddr.TFAddr)
 	}
 	d.internalMap[id] = addr
 }
 
-func (d *ReferenceDependencies) Contains(id tfresourceid.TFResourceId) bool {
+func (d *ReferenceDependencies) Contains(id string) bool {
 	_, exists := d.internalMap[id]
 	return exists
 }
 
-func (d *ReferenceDependencies) Get(id tfresourceid.TFResourceId) tfaddr.TFAddr {
+func (d *ReferenceDependencies) Get(id string) tfaddr.TFAddr {
 	return d.internalMap[id]
 }
 
@@ -43,7 +42,7 @@ func (d *ReferenceDependencies) Size() int {
 
 func (d *ReferenceDependencies) HasDependencyWithPrefix(prefix string) bool {
 	for tfResourceId := range d.internalMap {
-		if strings.HasPrefix(string(tfResourceId), prefix) {
+		if strings.HasPrefix(tfResourceId, prefix) {
 			return true
 		}
 	}
@@ -70,9 +69,9 @@ func (s *TFAddrSet) List() []string {
 	return result
 }
 
-func (d *AmbiguousDependencies) Add(id tfresourceid.TFResourceId, addr tfaddr.TFAddr) {
+func (d *AmbiguousDependencies) Add(id string, addr tfaddr.TFAddr) {
 	if d.internalMap == nil {
-		d.internalMap = make(map[tfresourceid.TFResourceId]*TFAddrSet)
+		d.internalMap = make(map[string]*TFAddrSet)
 	}
 	if _, ok := d.internalMap[id]; !ok {
 		d.internalMap[id] = &TFAddrSet{internalMap: make(map[tfaddr.TFAddr]bool)}
@@ -86,7 +85,7 @@ func (d *AmbiguousDependencies) Size() int {
 
 func (d *AmbiguousDependencies) HasDependencyWithPrefix(prefix string) bool {
 	for tfResourceId := range d.internalMap {
-		if strings.HasPrefix(string(tfResourceId), prefix) {
+		if strings.HasPrefix(tfResourceId, prefix) {
 			return true
 		}
 	}

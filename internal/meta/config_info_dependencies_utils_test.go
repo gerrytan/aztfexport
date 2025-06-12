@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/Azure/aztfexport/internal/tfaddr"
-	"github.com/Azure/aztfexport/internal/tfresourceid"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/magodo/armid"
@@ -32,7 +31,7 @@ func tfAddr(s string) tfaddr.TFAddr {
 
 func configInfo(
 	azureResourceIdStr AzureResourceId,
-	tFResourceId tfresourceid.TFResourceId,
+	tFResourceId string,
 	tfAddr tfaddr.TFAddr,
 	hclStr string,
 	ReferenceDependencies ReferenceDependencies,

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Azure/aztfexport/internal/tfresourceid"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"github.com/hashicorp/hcl/v2/hclwrite"
@@ -17,7 +16,7 @@ func (configs ConfigInfos) applyDependenciesToHclBlock() error {
 			cfg.hcl.Body().Blocks()[0].Body(),
 			&cfg.parentChildDeps,
 			&cfg.ambiguousDeps); err != nil {
-			return fmt.Errorf("applying explicit and ambiguous dependencies to %s: %w", cfg.TFResourceId.String(), err)
+			return fmt.Errorf("applying explicit and ambiguous dependencies to %s: %w", cfg.TFResourceId, err)
 		}
 		configs[i] = cfg
 	}
@@ -35,7 +34,7 @@ func applyReferenceDependenciesToHcl(body *hclwrite.Body, refDeps *ReferenceDepe
 		tokensModified := false
 
 		for i := 0; i < len(tokens); i++ {
-			maybeTfResId := tfresourceid.TFResourceId(string(tokens[i].Bytes))
+			maybeTfResId := string(tokens[i].Bytes)
 			// Parsing process guaranteed QuotedLit is surrounded by Opening and Closing quote
 			if tokens[i].Type == hclsyntax.TokenQuotedLit && refDeps.Contains(maybeTfResId) {
 				tfAddr := refDeps.Get(maybeTfResId)

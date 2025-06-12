@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/Azure/aztfexport/internal/tfaddr"
-	"github.com/Azure/aztfexport/internal/tfresourceid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +19,7 @@ func TestPopulateReferenceDependencies(t *testing.T) {
 			inputConfigs: []ConfigInfo{
 				configInfo(
 					AzureResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1"),
+					"/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1",
 					tfAddr("azurerm_foo_resource.res-0"),
 					`
 resource "azurerm_foo_resource" "res-0" {
@@ -32,7 +31,7 @@ resource "azurerm_foo_resource" "res-0" {
 				),
 				configInfo(
 					AzureResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Bar/bar/bar1"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Bar/bar/bar1"),
+					"/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Bar/bar/bar1",
 					tfAddr("azurerm_bar_resource.res-1"),
 					`
 resource "azurerm_bar_resource" "res-1" {
@@ -51,7 +50,7 @@ resource "azurerm_bar_resource" "res-1" {
 			inputConfigs: []ConfigInfo{
 				configInfo(
 					AzureResourceId("/subscriptions/123/resourceGroups/rg1"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/rg1"),
+					"/subscriptions/123/resourceGroups/rg1",
 					tfAddr("azurerm_resource_group.res-0"),
 					`
 resource "azurerm_resource_group" "res-0" {
@@ -64,7 +63,7 @@ resource "azurerm_resource_group" "res-0" {
 				),
 				configInfo(
 					AzureResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1"),
+					"/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1",
 					tfAddr("azurerm_foo_resource.res-1"),
 					`
 resource "azurerm_foo_resource" "res-1" {
@@ -78,8 +77,8 @@ resource "azurerm_foo_resource" "res-1" {
 			},
 			expectedReferenceDeps: map[AzureResourceId]ReferenceDependencies{
 				AzureResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1"): {
-					internalMap: map[tfresourceid.TFResourceId]tfaddr.TFAddr{
-						tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/rg1"): tfAddr("azurerm_resource_group.res-0"),
+					internalMap: map[string]tfaddr.TFAddr{
+						"/subscriptions/123/resourceGroups/rg1": tfAddr("azurerm_resource_group.res-0"),
 					},
 				},
 			},
@@ -90,7 +89,7 @@ resource "azurerm_foo_resource" "res-1" {
 			inputConfigs: []ConfigInfo{
 				configInfo(
 					AzureResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1/sub1/sub1"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1"),
+					"/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1",
 					tfAddr("azurerm_foo_resource.res-0"),
 					`
 resource "azurerm_foo_sub1_resource" "res-0" {
@@ -102,7 +101,7 @@ resource "azurerm_foo_sub1_resource" "res-0" {
 				),
 				configInfo(
 					AzureResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1/sub2/sub2"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1"),
+					"/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Foo/foo/foo1",
 					tfAddr("azurerm_foo_resource.res-1"),
 					`
 resource "azurerm_foo_sub2_resource" "res-1" {
@@ -114,7 +113,7 @@ resource "azurerm_foo_sub2_resource" "res-1" {
 				),
 				configInfo(
 					AzureResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Bar/bar/bar1"),
-					tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Bar/bar/bar1"),
+					"/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Bar/bar/bar1",
 					tfAddr("azurerm_bar_resource.res-2"),
 					`
 resource "azurerm_bar_resource" "res-2" {
@@ -129,8 +128,8 @@ resource "azurerm_bar_resource" "res-2" {
 			expectedReferenceDeps: nil,
 			expectedAmbiguousDeps: map[AzureResourceId]AmbiguousDependencies{
 				AzureResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Bar/bar/bar1"): {
-					internalMap: map[tfresourceid.TFResourceId]*TFAddrSet{
-						tfresourceid.TFResourceId("/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Bar/bar/bar1"): tfAddrSet(
+					internalMap: map[string]*TFAddrSet{
+						"/subscriptions/123/resourceGroups/rg1/providers/Microsoft.Bar/bar/bar1": tfAddrSet(
 							"azurerm_foo_resource.res-0",
 							"azurerm_foo_resource.res-1",
 						),
