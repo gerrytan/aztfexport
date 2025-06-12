@@ -52,8 +52,8 @@ func configInfo(
 			TFResourceId:    tFResourceId,
 			TFAddr:          tfAddr,
 		},
-		referenceDependencies: ReferenceDependencies,
-		ambiguousDependencies: AmbiguousDependencies,
-		hcl:                   hcl,
+		referenceDeps: ReferenceDependencies,
+		ambiguousDeps: AmbiguousDependencies,
+		hcl:           hcl,
 	}
 }

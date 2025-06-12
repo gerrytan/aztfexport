@@ -30,9 +30,9 @@ func (cfgs ConfigInfos) populateParentChildDependency() {
 			if parentId.Equal(ocfg.AzureResourceID) &&
 				// Only add parent as explicit dependency if it is not already (maybe transitively)
 				// a reference or ambiguous dependency.
-				!cfg.referenceDependencies.HasDependencyWithPrefix(ocfg.AzureResourceID.String()) &&
-				!cfg.ambiguousDependencies.HasDependencyWithPrefix(ocfg.AzureResourceID.String()) {
-				cfg.explicitDependencies.Add(ocfg.TFAddr)
+				!cfg.referenceDeps.HasDependencyWithPrefix(ocfg.AzureResourceID.String()) &&
+				!cfg.ambiguousDeps.HasDependencyWithPrefix(ocfg.AzureResourceID.String()) {
+				cfg.parentChildDeps.Add(ocfg.TFAddr)
 				break
 			}
 		}

@@ -150,9 +150,9 @@ resource "azurerm_bar_resource" "res-2" {
 			for _, cfg := range testCase.inputConfigs {
 				azureResourceId := AzureResourceId(cfg.AzureResourceID.String())
 				expectedReferenceDeps := testCase.expectedReferenceDeps[azureResourceId]
-				assert.Equal(t, cfg.referenceDependencies, expectedReferenceDeps)
+				assert.Equal(t, cfg.referenceDeps, expectedReferenceDeps)
 				expectedAmbiguousDeps := testCase.expectedAmbiguousDeps[azureResourceId]
-				assert.Equal(t, cfg.ambiguousDependencies.List(), expectedAmbiguousDeps.List())
+				assert.Equal(t, cfg.ambiguousDeps.List(), expectedAmbiguousDeps.List())
 			}
 		})
 	}

@@ -12,11 +12,11 @@ import (
 
 func (configs ConfigInfos) applyDependenciesToHclBlock() error {
 	for i, cfg := range configs {
-		applyReferenceDependenciesToHcl(cfg.hcl.Body().Blocks()[0].Body(), &cfg.referenceDependencies)
+		applyReferenceDependenciesToHcl(cfg.hcl.Body().Blocks()[0].Body(), &cfg.referenceDeps)
 		if err := applyExplicitAndAmbiguousDependenciesToHclBlock(
 			cfg.hcl.Body().Blocks()[0].Body(),
-			&cfg.explicitDependencies,
-			&cfg.ambiguousDependencies); err != nil {
+			&cfg.parentChildDeps,
+			&cfg.ambiguousDeps); err != nil {
 			return fmt.Errorf("applying explicit and ambiguous dependencies to %s: %w", cfg.TFResourceId.String(), err)
 		}
 		configs[i] = cfg

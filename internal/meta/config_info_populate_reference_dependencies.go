@@ -57,10 +57,10 @@ func (cfgs ConfigInfos) PopulateReferenceDependencies() error {
 			}
 
 			if len(dependingConfigsWithoutSelf) == 1 {
-				cfg.referenceDependencies.Add(depTFId, dependingConfigsWithoutSelf[0].TFAddr)
+				cfg.referenceDeps.Add(depTFId, dependingConfigsWithoutSelf[0].TFAddr)
 			} else if len(dependingConfigsWithoutSelf) > 1 {
 				for _, depCfg := range dependingConfigsWithoutSelf {
-					cfg.ambiguousDependencies.Add(depTFId, depCfg.TFAddr)
+					cfg.ambiguousDeps.Add(depTFId, depCfg.TFAddr)
 				}
 			}
 

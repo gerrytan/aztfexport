@@ -12,15 +12,15 @@ type ConfigInfo struct {
 	ImportItem
 
 	// Dependencies inferred by scanning for resource id values, will be applied by substituting with TF address
-	referenceDependencies ReferenceDependencies
+	referenceDeps ReferenceDependencies
 
 	// Dependencies inferred via resource id parent lookup. If not yet (transitively) present
 	// in referenceDependencies, will be applied as depends_on meta argument
-	explicitDependencies TFAddrSet
+	parentChildDeps TFAddrSet
 
 	// Multiple TF address for a TF resource id can exist, these will be appended as a comment inside depends_on block for
 	// user to manually resolve
-	ambiguousDependencies AmbiguousDependencies
+	ambiguousDeps AmbiguousDependencies
 
 	hcl *hclwrite.File
 }

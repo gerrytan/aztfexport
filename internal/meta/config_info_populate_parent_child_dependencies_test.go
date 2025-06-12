@@ -141,7 +141,7 @@ resource "azurerm_bar_resource" "res-2" {
 			for _, cfg := range testCase.inputConfigs {
 				azureResourceId := AzureResourceId(cfg.AzureResourceID.String())
 				expectedExplicitDeps := testCase.expectedExplicitDeps[azureResourceId]
-				assert.Equal(t, cfg.explicitDependencies.List(), expectedExplicitDeps.List())
+				assert.Equal(t, cfg.parentChildDeps.List(), expectedExplicitDeps.List())
 			}
 		})
 	}
