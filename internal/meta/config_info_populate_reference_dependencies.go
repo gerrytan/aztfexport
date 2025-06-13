@@ -14,6 +14,7 @@ import (
 // Note that the a single TF resource id can map to multiple resources -- in which case the dependencies will be categorised
 // as ambiguous.
 func (cfgs ConfigInfos) PopulateReferenceDependencies() error {
+	// key: TFResourceId
 	m := map[string][]*ConfigInfo{}
 	for _, cfg := range cfgs {
 		m[cfg.TFResourceId] = append(m[cfg.TFResourceId], &cfg)
@@ -41,7 +42,7 @@ func (cfgs ConfigInfos) PopulateReferenceDependencies() error {
 				return nil
 			}
 
-			depTFId := maybeTFId
+			depTFResId := maybeTFId
 
 			var dependingConfigsWithoutSelf []*ConfigInfo
 			for _, depCfg := range dependingConfigs[:] {
@@ -56,11 +57,21 @@ func (cfgs ConfigInfos) PopulateReferenceDependencies() error {
 			}
 
 			if len(dependingConfigsWithoutSelf) == 1 {
-				cfg.referenceDeps.Add(depTFId, dependingConfigsWithoutSelf[0].TFAddr)
-			} else if len(dependingConfigsWithoutSelf) > 1 {
-				for _, depCfg := range dependingConfigsWithoutSelf {
-					cfg.ambiguousDeps.Add(depTFId, depCfg.TFAddr)
+				cfg.dependencies.referenceDeps[depTFResId] = Dependency{
+					TFResourceId:    depTFResId,
+					AzureResourceId: dependingConfigsWithoutSelf[0].AzureResourceID.String(),
+					TFAddr:          dependingConfigsWithoutSelf[0].TFAddr,
 				}
+			} else if len(dependingConfigsWithoutSelf) > 1 {
+				deps := make([]Dependency, 0, len(dependingConfigsWithoutSelf))
+				for _, depCfg := range dependingConfigsWithoutSelf {
+					deps = append(deps, Dependency{
+						TFResourceId:    depTFResId,
+						AzureResourceId: depCfg.AzureResourceID.String(),
+						TFAddr:          depCfg.TFAddr,
+					})
+				}
+				cfg.dependencies.ambiguousDeps[depTFResId] = deps
 			}
 
 			return nil

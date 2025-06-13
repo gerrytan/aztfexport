@@ -2,6 +2,7 @@ package meta
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
@@ -11,11 +12,11 @@ import (
 
 func (configs ConfigInfos) applyDependenciesToHclBlock() error {
 	for i, cfg := range configs {
-		applyReferenceDependenciesToHcl(cfg.hcl.Body().Blocks()[0].Body(), &cfg.referenceDeps)
-		if err := applyExplicitAndAmbiguousDependenciesToHclBlock(
+		applyReferenceDependenciesToHcl(cfg.hcl.Body().Blocks()[0].Body(), cfg.dependencies.referenceDeps)
+		if err := applyParentChildAndAmbiguousDepsToHclBlock(
 			cfg.hcl.Body().Blocks()[0].Body(),
-			&cfg.parentChildDeps,
-			&cfg.ambiguousDeps); err != nil {
+			cfg.dependencies.parentChildDeps,
+			cfg.dependencies.ambiguousDeps); err != nil {
 			return fmt.Errorf("applying explicit and ambiguous dependencies to %s: %w", cfg.TFResourceId, err)
 		}
 		configs[i] = cfg
@@ -23,8 +24,8 @@ func (configs ConfigInfos) applyDependenciesToHclBlock() error {
 	return nil
 }
 
-func applyReferenceDependenciesToHcl(body *hclwrite.Body, refDeps *ReferenceDependencies) {
-	if refDeps.Size() == 0 {
+func applyReferenceDependenciesToHcl(body *hclwrite.Body, refDeps map[string]Dependency) {
+	if len(refDeps) == 0 {
 		return
 	}
 
@@ -34,13 +35,12 @@ func applyReferenceDependenciesToHcl(body *hclwrite.Body, refDeps *ReferenceDepe
 		tokensModified := false
 
 		for i := 0; i < len(tokens); i++ {
-			maybeTfResId := string(tokens[i].Bytes)
+			refDep, refDepExists := refDeps[string(tokens[i].Bytes)]
 			// Parsing process guaranteed QuotedLit is surrounded by Opening and Closing quote
-			if tokens[i].Type == hclsyntax.TokenQuotedLit && refDeps.Contains(maybeTfResId) {
-				tfAddr := refDeps.Get(maybeTfResId)
+			if tokens[i].Type == hclsyntax.TokenQuotedLit && refDepExists {
 				filteredTokens[len(filteredTokens)-1] = &hclwrite.Token{
 					Type:         hclsyntax.TokenIdent,
-					Bytes:        fmt.Appendf(nil, "%s.id", tfAddr.String()),
+					Bytes:        fmt.Appendf(nil, "%s.id", refDep.TFAddr),
 					SpacesBefore: tokens[i-1].SpacesBefore,
 				}
 				tokensModified = true
@@ -60,18 +60,33 @@ func applyReferenceDependenciesToHcl(body *hclwrite.Body, refDeps *ReferenceDepe
 	}
 }
 
-func applyExplicitAndAmbiguousDependenciesToHclBlock(
+func applyParentChildAndAmbiguousDepsToHclBlock(
 	body *hclwrite.Body,
-	explicitDeps *TFAddrSet,
-	ambiguousDeps *AmbiguousDependencies) error {
+	parentChildDeps map[Dependency]bool,
+	ambiguousDeps map[string][]Dependency) error {
 
-	if explicitDeps.Size() > 0 || ambiguousDeps.Size() > 0 {
+	if len(parentChildDeps) > 0 || len(ambiguousDeps) > 0 {
 		src := "depends_on = [\n"
-		if ambiguousDeps.Size() > 0 {
-			src += strings.Join(ambiguousDeps.List(), "\n") + "\n"
+		if len(ambiguousDeps) > 0 {
+			ambiguousDepsComments := make([]string, 0, len(ambiguousDeps))
+			for _, deps := range ambiguousDeps {
+				tfAddrs := make([]string, 0, len(deps))
+				for _, dep := range deps {
+					tfAddrs = append(tfAddrs, dep.TFAddr.String())
+				}
+				sort.Strings(tfAddrs)
+				ambiguousDepsComments = append(ambiguousDepsComments, fmt.Sprintf("# One of %s (can't auto-resolve as their ids are identical)", strings.Join(tfAddrs, ",")))
+			}
+			sort.Strings(ambiguousDepsComments)
+			src += strings.Join(ambiguousDepsComments, "\n") + "\n"
 		}
-		if explicitDeps.Size() > 0 {
-			src += strings.Join(explicitDeps.List(), ",\n") + "\n"
+		if len(parentChildDeps) > 0 {
+			tfAddrs := make([]string, 0, len(parentChildDeps))
+			for dep := range parentChildDeps {
+				tfAddrs = append(tfAddrs, dep.TFAddr.String())
+			}
+			sort.Strings(tfAddrs)
+			src += strings.Join(tfAddrs, ",\n") + "\n"
 		}
 		src += "]\n"
 		expr, diags := hclwrite.ParseConfig([]byte(src), "f", hcl.InitialPos)

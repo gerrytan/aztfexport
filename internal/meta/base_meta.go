@@ -1071,6 +1071,11 @@ func (meta baseMeta) stateToConfig(ctx context.Context, list ImportList) (Config
 		out = append(out, ConfigInfo{
 			ImportItem: importedList[i],
 			hcl:        f,
+			dependencies: Dependencies{
+				referenceDeps:   make(map[string]Dependency),
+				parentChildDeps: make(map[Dependency]bool),
+				ambiguousDeps:   make(map[string][]Dependency),
+			},
 		})
 	}
 
