@@ -38,8 +38,8 @@ type Dependencies struct {
 	// The key is TFResourceId of the child resource.
 	commonAttrDeps map[string]CommonAttrDep
 
-	// Fallback for when dependency from child to parent was not established by reference or common attributes, or if they're
-	// ambiguous. These will be applied via the "depends_on" block.
+	// Fallback for when dependency from child to parent was not established by reference or common attributes. These
+	// will be applied via the "depends_on" block.
 	explicitDeps map[Dependency]bool
 }
 
