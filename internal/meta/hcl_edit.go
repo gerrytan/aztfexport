@@ -15,7 +15,7 @@ func (configs ConfigInfos) applyDependenciesToHclBlock() error {
 		applyReferenceDependenciesToHcl(cfg.hcl.Body().Blocks()[0].Body(), cfg.dependencies.refDeps)
 		if err := applyParentChildAndAmbiguousDepsToHclBlock(
 			cfg.hcl.Body().Blocks()[0].Body(),
-			cfg.dependencies.parentChildDeps,
+			cfg.dependencies.explicitDeps,
 			cfg.dependencies.ambiguousRefDeps); err != nil {
 			return fmt.Errorf("applying explicit and ambiguous dependencies to %s: %w", cfg.TFResourceId, err)
 		}

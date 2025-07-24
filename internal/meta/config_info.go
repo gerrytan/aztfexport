@@ -38,10 +38,9 @@ type Dependencies struct {
 	// The key is TFResourceId of the child resource.
 	commonAttrDeps map[string]CommonAttrDep
 
-	// Dependencies inferred via Azure resource id parent lookup, and will be applied in the "depends_on" block.
-	// Dependency that's already satisfied via refDeps should not be included here.
-	// TODO: rename this to explicitDeps to avoid confusion with commonAttrDeps?
-	parentChildDeps map[Dependency]bool
+	// Fallback for when dependency from child to parent was not established by reference or common attributes, or if they're
+	// ambiguous. These will be applied via the "depends_on" block.
+	explicitDeps map[Dependency]bool
 }
 
 type Dependency struct {
@@ -51,7 +50,7 @@ type Dependency struct {
 }
 
 type CommonAttrDep struct {
-	// AzureResourceId of the parent resource, used to mark that a dependency relation is established
+	// AzureResourceId of the parent resource, used to mark that a dependency relationship is established
 	AzureResourceId string
 
 	// TFAddr of the parent resource, for example: azurerm_resource_group.res-0
