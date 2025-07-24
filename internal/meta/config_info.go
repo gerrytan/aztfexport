@@ -35,7 +35,7 @@ type Dependencies struct {
 	// Inferred by checking if the resource has a common attribute with the same value as its parent. For example if
 	// azurerm_virtual_network.res-1.resource_group_name is the same value as its parent azurerm_resource_group.res-0.name,
 	// it will be replaced with the TF address.
-	// The key is TFResourceId of the child resource.
+	// The key is attribute name of the child resource (eg: "resource_group_name")
 	commonAttrDeps map[string]CommonAttrDep
 
 	// Fallback for when dependency from child to parent was not established by reference or common attributes. These
@@ -56,7 +56,7 @@ type CommonAttrDep struct {
 	// TFAddr of the parent resource, for example: azurerm_resource_group.res-0
 	TFAddr tfaddr.TFAddr
 
-	// The attribute name mapping between child -> parent. For example: "resource_group_name" -> "name"
+	// The parent attribute name to be used for mapping. For example: "name" (for a resource_group-typed parent)
 	// This will be used by hcl_edit.go to replace "resource_group_name" = "my-rg" with "resource_group_name" = azurerm_resource_group.res-0.name
-	AttrMap map[string]string
+	AttrName string
 }
